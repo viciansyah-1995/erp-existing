@@ -219,3 +219,141 @@ Batch berikutnya yang paling penting untuk PPIC:
 
 ## Catatan Objektivitas
 Temuan di atas masih berbasis observasi layar. Beberapa dugaan logic bisnis masih perlu divalidasi saat lebih banyak screen tersedia atau saat user menjelaskan urutan kerja aktual.
+
+
+---
+
+# 6. Screen Audit - Raw Material / Out Of Stock Raw Material
+
+## Identitas Screen
+- Nama screen: Out Of Stock Raw Material
+- Module / area: Raw Material
+- Role pengguna: PPIC / PIC
+- Tipe screen: monitoring list / exception report
+- Tujuan screen: memantau bahan baku dengan stok habis atau nol
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tabel out of stock raw material
+- Kolom terlihat: nomor, kode, nama raw material, supplier, stok berjalan (kg), min. stok (kg), aksi
+- Tombol aksi `Detail`
+
+## Observasi Objektif
+- Existing system memiliki layar exception khusus untuk material yang out of stock, terpisah dari layar raw material umum.
+- Nilai stok berjalan di screenshot terlihat `0.00`, sehingga layar ini tampaknya fokus pada item yang benar-benar kosong.
+- Min. stok tetap ditampilkan berdampingan dengan stok berjalan, artinya threshold stock dipakai sebagai referensi penting dalam monitoring.
+- Menu existing memecah monitoring material menjadi beberapa layar berbeda: data raw material, expired raw material, out of stock raw material, perbandingan harga, purchase request, dan analisa raw material.
+
+## Dugaan Logic Bisnis
+- PPIC existing kemungkinan menggunakan layar ini untuk identifikasi shortage yang butuh tindakan pembelian atau reschedule.
+- Out of stock screen tampaknya bersifat monitoring dan exception-driven, bukan sekadar master list.
+
+## Pertanyaan Terbuka
+- Apakah item di layar ini otomatis menjadi kandidat purchase request?
+- Apakah out of stock dihitung hanya dari on hand, atau sudah mempertimbangkan reserved/incoming stock?
+- Apakah ada alert otomatis atau hanya passive monitoring?
+
+## Kandidat Requirement Rebuild
+- Sistem baru perlu shortage view yang lebih informatif: on hand, reserved, incoming, open PR/PO, dan suggested replenishment.
+- Out of stock sebaiknya dibedakan dari below min stock agar prioritas keputusan lebih jelas.
+
+---
+
+# 7. Screen Audit - Raw Material / Perbandingan Harga
+
+## Identitas Screen
+- Nama screen: Perbandingan Harga
+- Module / area: Raw Material
+- Role pengguna: PPIC / PIC
+- Tipe screen: report / search screen
+- Tujuan screen: membandingkan harga bahan baku
+
+## Komponen Layar
+- Search field dengan placeholder pencarian kata kunci raw material
+- Tombol `Find`
+- Area hasil di bawah search
+
+## Observasi Objektif
+- Screen ini disiapkan untuk membandingkan harga raw material, tetapi screenshot tidak menampilkan hasil pencarian atau tabel hasil.
+- Nama menu dan layout menunjukkan bahwa pricing comparison sudah menjadi kebutuhan eksplisit dalam sistem existing.
+- PPIC diberi akses ke informasi perbandingan harga, bukan hanya purchasing atau finance.
+
+## Dugaan Logic Bisnis
+- Existing system kemungkinan mendukung keputusan pembelian atau evaluasi supplier dari sisi harga material.
+- Jika hasil comparison muncul setelah pencarian, berarti per item raw material bisa memiliki multi-supplier / multi-price history.
+
+## Pertanyaan Terbuka
+- Apakah perbandingan harga membandingkan supplier aktif sekaligus, atau history harga dalam periode waktu tertentu?
+- Apakah data ini hanya referensi visual atau bisa dipakai generate PR / keputusan supplier?
+- Apakah ada dimensi kuantitas, satuan, batch, atau effective date dalam comparison ini?
+
+## Kandidat Requirement Rebuild
+- Di sistem baru, comparison view sebaiknya support item, supplier, last price, current quote, lead time, MOQ, payment term, dan tanggal efektif harga.
+- Jika PPIC memang memakai data harga untuk planning, perlu batasan yang jelas antara visibilitas PPIC dan ownership purchasing.
+
+---
+
+# 8. Screen Audit - Raw Material / Purchase Request Raw Material
+
+## Identitas Screen
+- Nama screen: Purchase Request Raw Material
+- Module / area: Raw Material / Purchase Request
+- Role pengguna: PPIC / PIC
+- Tipe screen: transaction list / request monitoring
+- Tujuan screen: mencatat dan memantau purchase request bahan baku
+
+## Komponen Layar
+- Search field
+- Filter tanggal awal dan tanggal akhir
+- Tombol `Find`
+- Tombol `+ Tambah Purchase Request Raw Material`
+- Tombol `Export to Excel`
+- Dropdown filter status / tampilan di kanan atas
+- Tabel purchase request
+- Kolom terlihat: aksi, no. PO/nomor dokumen, kode raw material, raw material, nama bahan baku original, quantity, availability, tanggal permintaan, tanggal approve, catatan, status PR, tanggal kirim, jumlah kirim (kg), batch/expired date
+- Badge status availability `READY`
+- Badge status PR terlihat berwarna kuning (label belum terbaca jelas dari screenshot)
+
+## Observasi Objektif
+- Purchase request raw material di existing system sudah menjadi transaksi terpisah, bukan sekadar catatan shortage.
+- Ada tombol create `Tambah Purchase Request Raw Material`, berarti PPIC atau PIC bisa membuat request langsung dari modul ini.
+- Tabel PR cukup kaya informasi: tidak hanya quantity dan item, tetapi juga availability, approval date, shipment date, delivered qty, dan batch/expired date.
+- Label `availability` menunjukkan sistem menampilkan status kesiapan item pada layar PR.
+- Kolom `jumlah kirim (kg)` dan `batch/expired date` mengindikasikan bahwa existing system juga memonitor realisasi kirim material terhadap PR.
+- Nama kolom `No. PO` pada layar PR raw material masih perlu divalidasi: bisa jadi itu nomor referensi internal, bukan purchase order final ke vendor.
+
+## Dugaan Logic Bisnis
+- Existing PR flow tampaknya menggabungkan request, monitoring availability, dan sebagian status fulfillment pada satu layar.
+- PPIC kemungkinan membuat PR berdasarkan shortage / schedule need, lalu memonitor progres realisasi material dari layar ini.
+- Kehadiran field batch/expired date menunjukkan material receipt atau shipment mungkin sudah ditautkan ke PR level.
+
+## Pertanyaan Terbuka
+- Apakah `No. PO` di sini benar-benar PO vendor, atau hanya nomor request / referensi dokumen?
+- Status PR kuning itu artinya apa: pending, open, partial, atau approved?
+- Availability `READY` mengacu ke stok internal, vendor readiness, atau status pemenuhan request?
+- Siapa yang approve PR: purchasing, manager, atau owner?
+- Apakah PPIC bisa edit PR setelah approval atau setelah shipment terjadi?
+
+## Kandidat Requirement Rebuild
+- Sistem baru sebaiknya memisahkan jelas antara PR, RFQ/PO, receipt, dan fulfillment status, walaupun tetap saling terhubung.
+- View PR perlu support shortage reason, related production/schedule, requested date, approved date, supplier assignment, incoming quantity, dan remaining quantity.
+- Jika batch/expiry memang dipakai di layar PR, perlu dipastikan apakah itu business need valid atau efek desain existing yang terlalu campur antara request dan receiving.
+
+---
+
+# Pembaruan Kesimpulan PPIC Setelah Batch Tambahan
+
+## Observasi Global Tambahan
+- Existing PPIC sangat bergantung pada **monitoring by exception screen**, misalnya expired, out of stock, dan PR monitoring.
+- Modul raw material existing tampak menjadi pusat keputusan penting untuk shortage, replenishment, supplier visibility, dan tracking request.
+- Existing system masih terlihat report-heavy dan transactional-monitoring-heavy, dengan banyak layar terpisah untuk topik yang saling berhubungan.
+- Dari sisi requirement rebuild, kemungkinan besar modul baru perlu menyederhanakan layar-layar ini menjadi dashboard + actionable views, bukan banyak screen terpecah tanpa relasi yang jelas.
+
+## Arah Audit Selanjutnya yang Direkomendasikan
+1. Analisa Raw Material
+2. Detail / form create Purchase Request Raw Material
+3. Monitoring Sales Order
+4. Production Schedule
+5. Sales Order detail yang menjadi trigger kebutuhan material
+6. Packaging module untuk melihat apakah polanya mirip dengan raw material
