@@ -427,3 +427,281 @@ Temuan di atas masih berbasis observasi layar. Beberapa dugaan logic bisnis masi
   - **quality / test result** (QC)
   - **technical/formulation suitability** (R&D bila relevan)
 - PPIC tetap perlu visibilitas, tetapi belum tentu menjadi owner input untuk seluruh aktivitas analisa material.
+
+
+---
+
+# 10. Screen Audit - Monitoring Sales Order
+
+## Identitas Screen
+- Nama screen: Monitoring Sales Order
+- Module / area: Sales Order / Monitoring
+- Role pengguna: PPIC / PIC
+- Tipe screen: transaction monitoring list
+- Tujuan screen: memantau status sales order yang relevan untuk proses PPIC
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tombol `Export to Excel`
+- Tabel monitoring sales order
+- Kolom terlihat: aksi, status, no PO, no SO, customer, produk, kode sample, no PO PIC, no item, tanggal PO, due date PO, tanggal pemesanan, tanggal persetujuan marketing, dibuat oleh, gramasi, qty, isi box, box
+- Tombol aksi: `Detail`, `History`, `Detail Pending`, `Close PO`
+- Badge status: terlihat label seperti `Processing MKT`, `Pending`, dan badge lain terkait proses order
+- Badge kecil pada salah satu kolom yang tampak seperti nomor item / line status
+
+## Observasi Objektif
+- PPIC memiliki akses langsung ke layar monitoring sales order, bukan hanya dashboard summary.
+- Layar ini memuat detail order yang cukup operasional: due date, tanggal pemesanan, approval marketing, gramasi, qty, isi box, dan box.
+- Ada tombol `Close PO`, berarti PPIC atau role ini diberi ability untuk menutup order / PO dari layar monitoring.
+- Ada tombol `Detail Pending`, menunjukkan existing system memisahkan kondisi pending tertentu yang perlu ditindaklanjuti.
+- Status order sangat terkait dengan proses marketing, terlihat dari badge `Processing MKT` dan kolom tanggal persetujuan marketing.
+
+## Dugaan Logic Bisnis
+- Monitoring sales order tampaknya menjadi titik awal penting bagi PPIC untuk menentukan order mana yang siap diproses lebih lanjut.
+- Existing PPIC flow kemungkinan bergantung pada status komersial / marketing sebelum lanjut ke readiness material atau schedule.
+- Layar ini bisa menjadi jembatan antara fungsi commercial dan planning.
+
+## Pertanyaan Terbuka
+- Siapa yang berwenang menekan `Close PO`?
+- Apakah `Close PO` menutup order secara bisnis, atau hanya menandai selesai secara operasional?
+- `Detail Pending` mengarah ke jenis pending apa: DP, sample, dokumen, material, atau approval?
+- Apakah due date PO menjadi trigger utama schedule PPIC?
+
+## Kandidat Requirement Rebuild
+- Sistem baru perlu memisahkan dengan jelas antara status commercial, status planning, dan status fulfillment.
+- Monitoring sales order untuk PPIC sebaiknya menyorot readiness, shortage, hold reason, dan next action, bukan hanya status umum.
+- Hak untuk `Close PO` perlu governance jelas agar tidak tercampur dengan fungsi commercial.
+
+---
+
+# 11. Screen Audit - Customer / Data Customer
+
+## Identitas Screen
+- Nama screen: Data Customer
+- Module / area: Customer
+- Role pengguna: PPIC / PIC
+- Tipe screen: master list / reference view
+- Tujuan screen: melihat daftar customer dan mengakses relasi ke produk serta sales order
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tabel customer
+- Kolom terlihat: nomor, name, personal name, alamat, email, no telepon, detail
+- Tombol aksi: `Produk`, `Sales Order`
+
+## Observasi Objektif
+- PPIC punya akses langsung ke master customer.
+- Dari list customer, user bisa langsung lompat ke `Produk` dan `Sales Order`, sehingga customer dipakai sebagai anchor navigasi ke data lain.
+- Data customer memuat alamat, email, dan nomor telepon, yang berarti visibilitas PPIC ke data customer cukup luas.
+
+## Dugaan Logic Bisnis
+- Existing system memungkinkan PPIC menelusuri produk dan sales order berdasarkan customer tertentu.
+- Ini menunjukkan struktur data existing cukup customer-centric untuk navigasi operasional.
+
+## Pertanyaan Terbuka
+- Apakah customer master ini hanya view-only untuk PPIC?
+- Apakah `Produk` berarti daftar produk yang pernah dipesan customer atau produk yang terdaftar untuk customer tersebut?
+- Apakah ada constraint khusus per customer seperti MOQ, packaging spec, atau SLA?
+
+## Kandidat Requirement Rebuild
+- Di sistem baru, customer reference untuk PPIC sebaiknya fokus pada informasi yang relevan untuk planning: active products, current orders, service level, dan packaging/profile requirements.
+- Data kontak customer tidak harus tampil penuh jika tidak dibutuhkan PPIC untuk operasional sehari-hari.
+
+---
+
+# 12. Screen Audit - Packaging / Data Packaging
+
+## Identitas Screen
+- Nama screen: Data Packaging
+- Module / area: Packaging
+- Role pengguna: PPIC / PIC
+- Tipe screen: inventory monitoring / master list hybrid
+- Tujuan screen: memantau data dan stok packaging
+
+## Komponen Layar
+- Search packaging field
+- Search packaging by kategori field
+- Tombol `Find`
+- Tombol `Reset`
+- Tombol `Export to Excel`
+- Tabel packaging
+- Kolom terlihat: nomor, kode, nama packaging, kategori produk, unit, stok berjalan, min. stok, detail
+- Tombol aksi: `Stok`, `Outstanding`
+
+## Observasi Objektif
+- Struktur layar packaging sangat mirip dengan raw material data screen.
+- Packaging memiliki stok berjalan dan min stock, menunjukkan packaging diperlakukan sebagai inventory planning object yang setara pentingnya dengan raw material.
+- Ada search by kategori, sehingga packaging memiliki klasifikasi per kategori produk.
+- Ada tombol `Outstanding`, sama seperti raw material, menandakan packaging shortage/open requirement juga dimonitor tersendiri.
+- Unit packaging terlihat bervariasi (roll, pieces), jadi UoM sudah relevan pada layar existing.
+
+## Dugaan Logic Bisnis
+- Existing PPIC process memperlakukan packaging sebagai domain inventory dan replenishment tersendiri.
+- Monitoring packaging likely dipakai untuk memastikan readiness sebelum produksi atau release order.
+
+## Pertanyaan Terbuka
+- Apakah packaging punya purchase request screen terpisah? (menu menunjukkan ada `Purchase Request` dan `Pembatalan Purchase Request`).
+- Apakah `Outstanding` untuk packaging berarti open procurement / shortage / pending fulfillment?
+- Apakah packaging terkait langsung dengan customer-specific artwork atau hanya item generik?
+
+## Kandidat Requirement Rebuild
+- Di sistem baru, packaging planning sebaiknya disejajarkan dengan raw material planning tetapi tetap dibedakan karena approval spec/artwork bisa berbeda.
+- View packaging perlu mendukung stock on hand, reserved, incoming, outstanding procurement, dan customer/product linkage.
+
+---
+
+# 13. Screen Audit - Product / Data Produk
+
+## Identitas Screen
+- Nama screen: Data Produk
+- Module / area: Product
+- Role pengguna: PPIC / PIC
+- Tipe screen: master product list
+- Tujuan screen: melihat daftar produk yang terdaftar di sistem
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tabel data produk
+- Kolom terlihat: aksi, nama produk, nama BPOM, size per sachet (gr), customer, dibuat tanggal
+- Tombol aksi: `Detail`, `Edit`
+
+## Observasi Objektif
+- PPIC punya akses ke product master dan bahkan terlihat ada tombol `Edit` pada layar list.
+- Kolom `nama BPOM` menunjukkan product master sangat terkait dengan data regulatory / compliance.
+- Product master juga dikaitkan ke customer, artinya product list existing kemungkinan customer-specific atau minimal customer-referenced.
+- `Size per sachet (gr)` tampil sebagai field utama, yang menunjukkan gramasi menjadi informasi inti di master produk.
+
+## Dugaan Logic Bisnis
+- Existing product master berfungsi sebagai titik temu antara commercial product, regulatory naming, dan production sizing.
+- Jika PPIC bisa edit product, maka ownership master data existing tampaknya belum dipisah ketat.
+
+## Pertanyaan Terbuka
+- Apakah `Edit` benar-benar aktif untuk role PPIC atau hanya terlihat karena login superadmin?
+- Apakah product master di-create dari sample approval, sales, atau R&D?
+- Seberapa erat hubungan produk dengan customer-specific formula atau packaging?
+
+## Kandidat Requirement Rebuild
+- Di sistem baru, product master sebaiknya punya ownership lebih jelas antara commercial, regulatory, dan production data.
+- Field penting seperti gramasi, regulatory name, customer mapping, active status, dan packaging profile perlu dipisah per fungsi tetapi tetap sinkron.
+
+---
+
+# Kemungkinan Reverse Engineering Lanjutan dari Screen PPIC Existing
+
+## Yang Berpotensi Bisa Diambil dari Existing System
+Berdasarkan screen yang sudah terlihat, beberapa area reverse engineering non-source-code yang realistis untuk dilakukan nanti:
+
+### 1. Reverse menu map dan navigasi modul
+Bisa dilakukan dengan:
+- inventory semua menu sidebar
+- klik-through per menu / submenu
+- catat pola relasi antar layar
+
+Potensi hasil:
+- module map existing
+- relasi customer -> produk -> sales order
+- relasi raw material / packaging -> stock -> outstanding -> PR
+
+### 2. Reverse field dan status workflow
+Bisa dilakukan dengan:
+- inventory kolom tabel
+- inventory field form detail
+- catat status badge dan perubahan status
+- catat tombol aksi yang muncul pada kondisi tertentu
+
+Potensi hasil:
+- kamus status existing
+- trigger transisi status
+- kandidat business rules per screen
+
+### 3. Reverse data model permukaan
+Bisa dilakukan dari observasi UI dengan menandai entity yang berulang:
+- customer
+- product
+- sales order
+- raw material
+- packaging
+- supplier
+- purchase request
+- batch / expired
+
+Potensi hasil:
+- conceptual entity relationship awal
+- candidate master vs transaction mapping
+
+### 4. Reverse report/export behavior
+Bisa dilakukan dengan:
+- identifikasi layar yang punya export Excel
+- lihat variasi export yang tersedia
+- nanti jika memungkinkan, uji file hasil export
+
+Potensi hasil:
+- kebutuhan report existing
+- kebutuhan kolom output yang dianggap penting user
+- indikasi tabel data di belakang layar
+
+### 5. Reverse hidden technical clues bila akses browser tersedia
+Jika nanti audit dilakukan langsung di browser hidup dan legal aksesnya tersedia, bisa dilanjut ke:
+- inspect request URL
+- network payload
+- parameter filter
+- pattern ID / code / status
+- nama endpoint dan response structure
+
+Potensi hasil:
+- API behavior observation
+- parameter naming existing
+- petunjuk entity dan struktur data
+
+## Risiko Reverse Engineering yang Perlu Dijaga
+
+### Risiko 1 - Salah simpulan ownership proses
+Banyak screen existing mencampur visibilitas dan ownership. Karena itu, melihat sebuah menu di role PPIC tidak otomatis berarti PPIC adalah owner prosesnya.
+
+Mitigasi:
+- pisahkan antara `bisa lihat`, `bisa input`, `bisa approve`, dan `benar-benar owner`.
+
+### Risiko 2 - Salah baca status bisnis
+Badge seperti `Processing MKT`, `Pending`, `READY`, atau status lainnya bisa tampak jelas di UI, tapi artinya belum tentu sama dengan dugaan kita.
+
+Mitigasi:
+- setiap status harus dicatat sebagai observasi dulu, baru diberi hipotesis dan pertanyaan validasi.
+
+### Risiko 3 - Layar monitoring dianggap sebagai flow penuh
+Banyak screen existing tampak seperti monitoring/reporting layer, bukan sumber transaksi utama.
+
+Mitigasi:
+- cari form create/edit/detail yang menjadi source of truth sebelum menyimpulkan alur bisnis final.
+
+### Risiko 4 - Role saat screenshot terlalu tinggi
+Login yang terlihat adalah `Superadmin / Managing - Owner / Login PPIC`, jadi screen yang muncul belum tentu mewakili hak akses user PPIC murni.
+
+Mitigasi:
+- tandai semua kemampuan edit/close/approve sebagai `perlu validasi hak akses role nyata`.
+
+### Risiko 5 - Legal dan etika reverse engineering
+Jika nanti masuk ke level network capture, endpoint inspection, atau DB observation, pastikan aksesnya sah dan memang diizinkan oleh owner sistem.
+
+Mitigasi:
+- fokus dulu ke observasi bisnis dari layar
+- jika masuk technical inspection, lakukan hanya dengan izin yang jelas.
+
+---
+
+# Pembaruan Kesimpulan PPIC Setelah Batch Ini
+
+## Observasi Global Tambahan
+- PPIC existing terlihat sangat terhubung dengan customer, product, sales order, raw material, dan packaging sekaligus.
+- Existing UI menunjukkan domain PPIC sangat lebar, tetapi ini belum tentu berarti ownership PPIC juga selebar itu.
+- Modul-modul yang muncul memperlihatkan bahwa existing system kemungkinan dibangun berdasarkan kebutuhan operasional harian dan monitoring cepat, bukan pemisahan domain yang bersih.
+
+## Arah Audit Selanjutnya yang Direkomendasikan
+1. Detail / form screen dari Sales Order
+2. Production Schedule
+3. Detail / form screen dari Purchase Request Raw Material
+4. Packaging Purchase Request / Pembatalan Purchase Request
+5. Sample module yang terkait product creation
+6. Screen report PPIC untuk melihat output final yang dianggap penting user
