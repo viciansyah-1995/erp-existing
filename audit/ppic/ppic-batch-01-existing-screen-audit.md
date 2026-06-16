@@ -705,3 +705,69 @@ Mitigasi:
 4. Packaging Purchase Request / Pembatalan Purchase Request
 5. Sample module yang terkait product creation
 6. Screen report PPIC untuk melihat output final yang dianggap penting user
+
+
+---
+
+# 14. Screen Audit - Sales Order / Data Sales Order (SO)
+
+## Identitas Screen
+- Nama screen: Data Sales Order (SO)
+- Module / area: Sales Order
+- Role pengguna: PPIC / PIC
+- Tipe screen: transaction list / operational order list
+- Tujuan screen: melihat daftar sales order yang menjadi basis tindak lanjut operasional PPIC
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tabel data sales order
+- Kolom terlihat: aksi, no PO, no SO, customer, tanggal PO, due date PO, NC/JE, tanggal pembuatan, tanggal persetujuan marketing, dibuat oleh, produk, kode sample, satuan/unit, jumlah/qty, jumlah/qty produksi, hasil produksi, status
+- Tombol aksi `Detail`
+- Badge status `Processing PPIC`
+- Kolom jumlah produksi dan hasil produksi menunjukkan nilai numerik per line order
+- Product row tampak bisa multi-line di bawah customer/order tertentu
+
+## Observasi Objektif
+- Screen ini berbeda dari `Monitoring Sales Order` karena terasa lebih seperti list operasional utama, bukan hanya monitoring summary.
+- Status yang terlihat pada layar ini adalah `Processing PPIC`, yang mengindikasikan order sudah masuk ke domain kerja PPIC.
+- Ada pemisahan antara `jumlah/qty`, `jumlah/qty produksi`, dan `hasil produksi`, artinya existing system mencoba melacak transisi order dari permintaan ke realisasi produksi.
+- Ada kolom `kode sample`, menunjukkan hubungan langsung antara sales order dengan referensi sample tertentu.
+- Ada kolom `NC/JE` yang belum jelas artinya, tapi tampak sebagai field operasional penting pada order.
+- Tabel ini tampak menampilkan multiple product line dalam satu customer/order context, sehingga satu PO bisa berisi beberapa item.
+
+## Dugaan Logic Bisnis
+- Ini kemungkinan salah satu list utama yang digunakan PPIC untuk memutuskan order mana yang harus disiapkan / diproses.
+- Status `Processing PPIC` bisa menjadi handoff dari Marketing ke PPIC.
+- Kolom qty produksi dan hasil produksi mengindikasikan ada tracking kuantitas per order line menuju realisasi.
+
+## Pertanyaan Terbuka
+- Apa arti field `NC/JE` dalam konteks order existing?
+- Apakah `jumlah/qty produksi` diisi manual oleh PPIC atau otomatis dari production schedule / production execution?
+- `hasil produksi` mengacu ke output aktual, output good, atau delivered quantity?
+- Apakah screen ini source utama order processing PPIC, sementara monitoring sales order hanya layar bantu?
+
+## Kandidat Requirement Rebuild
+- Sistem baru perlu memisahkan dengan jelas order commercial list, order planning queue, production allocation, dan fulfillment progress.
+- Handoff dari Marketing ke PPIC harus memiliki status transisi yang jelas, misalnya `Commercial Clear`, `Ready for PPIC Review`, `PPIC Planning`, `Released to Production`.
+- Relasi order line, sample code, product, qty requested, qty planned, qty produced, dan output final harus tetap dipertahankan secara eksplisit.
+
+---
+
+# Pembaruan Kesimpulan PPIC Setelah Screen Data Sales Order
+
+## Observasi Global Tambahan
+- Existing PPIC benar-benar berada di tengah hubungan antara sales order dan production readiness.
+- Screen `Data Sales Order (SO)` menunjukkan bahwa PPIC existing bukan hanya memonitor, tetapi sudah menjadi tahap status tersendiri dalam lifecycle order.
+- Relasi sample code dengan sales order menandakan pentingnya linkage sample-to-order pada sistem existing.
+
+## Implikasi ke Rebuild
+- Rebuild ERP baru harus menjaga chain berikut tetap eksplisit:
+  - customer
+  - product
+  - sample reference
+  - sales order line
+  - qty request
+  - PPIC processing status
+  - qty produksi / hasil produksi
+- Ini penting supaya sistem baru tidak hanya meniru tampilan list, tetapi benar-benar menangkap business state yang bergerak di balik order.
