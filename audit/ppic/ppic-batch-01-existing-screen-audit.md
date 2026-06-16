@@ -357,3 +357,73 @@ Temuan di atas masih berbasis observasi layar. Beberapa dugaan logic bisnis masi
 4. Production Schedule
 5. Sales Order detail yang menjadi trigger kebutuhan material
 6. Packaging module untuk melihat apakah polanya mirip dengan raw material
+
+
+---
+
+# 9. Screen Audit - Raw Material / Analisa Raw Material
+
+## Identitas Screen
+- Nama screen: Analisa Raw Material
+- Module / area: Raw Material
+- Role pengguna: PPIC / PIC
+- Tipe screen: analysis / evaluation screen
+- Tujuan screen: mengevaluasi hasil analisa bahan baku sample atau kandidat material sebelum dipakai
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tabel analisa raw material
+- Kolom terlihat: tanggal datang sample, supplier, nama raw material, batch, expire date, result, COA tersedia/tidak, bisa dipakai/tidak, moisture, approval head BoD
+- Badge status berwarna untuk beberapa kolom evaluasi
+
+## Observasi Objektif
+- Existing system memiliki layar analisa raw material yang cukup spesifik, bukan sekadar stock atau master material.
+- Tabel menyimpan data batch-level dan expire date, sehingga analisa dikaitkan ke sampel / lot tertentu.
+- Ada kolom narasi `result` yang cukup panjang, berisi penilaian atau kesimpulan penggunaan material.
+- Ada indikator `COA tersedia/tidak`, sehingga certificate of analysis menjadi bagian penting dalam evaluasi material.
+- Ada indikator `bisa dipakai/tidak`, sehingga layar ini tampak menjadi salah satu titik keputusan pemakaian bahan.
+- Ada status `moisture`, yang menunjukkan ada parameter kualitas tertentu yang dipantau secara eksplisit.
+- Ada kolom `approval head BoD`, berarti existing system melibatkan approval level tinggi setidaknya untuk hasil tertentu atau keputusan material tertentu.
+- Menu ini berada di bawah modul Raw Material, berdampingan dengan data raw material, expired, out of stock, perbandingan harga, dan purchase request.
+
+## Dugaan Logic Bisnis
+- Existing PPIC tidak hanya melakukan planning material, tetapi juga memiliki visibilitas terhadap hasil evaluasi sample material dari supplier.
+- Screen ini kemungkinan dipakai sebagai referensi keputusan apakah material supplier layak dipakai untuk produk tertentu, atau perlu reject / hold / compare dengan material lain.
+- Narasi result yang panjang mengindikasikan proses evaluasi existing masih cukup manual dan deskriptif, belum sepenuhnya berbasis parameter terstruktur.
+
+## Pertanyaan Terbuka
+- Siapa yang input hasil analisa raw material: PPIC, QC, R&D, atau gabungan?
+- Apakah `bisa dipakai/tidak` adalah keputusan final, atau hanya rekomendasi awal?
+- Approval Head BoD dipakai untuk semua analisa atau hanya untuk kondisi tertentu?
+- Moisture status di sini apakah hasil lab, QC, atau evaluasi supplier?
+- Apakah screen ini terkait langsung ke purchase decision atau hanya referensi teknis?
+
+## Kandidat Requirement Rebuild
+- Di sistem baru, analisa raw material sebaiknya dipisah jelas antara evaluasi teknis, evaluasi kualitas, evaluasi dokumen, dan keputusan bisnis pemakaian.
+- Parameter seperti COA, moisture, pass/fail, intended use, replacement note, dan approval sebaiknya dibuat lebih terstruktur, tidak hanya narasi result panjang.
+- Jika approval level tinggi memang dibutuhkan, trigger approval harus jelas: misalnya material baru, material alternatif, deviasi mutu, atau supplier substitution.
+
+---
+
+# Pembaruan Kesimpulan PPIC Setelah Analisa Raw Material
+
+## Observasi Global Tambahan
+- Existing PPIC module tidak hanya berperan pada planning dan shortage, tetapi juga menyentuh evaluasi teknis material.
+- Modul raw material existing tampaknya menjadi campuran antara:
+  - master data
+  - stock monitoring
+  - expiry monitoring
+  - shortage monitoring
+  - purchase request
+  - price comparison
+  - material analysis
+- Ini menunjukkan desain existing cukup sentralistik di satu domain menu, tetapi berpotensi membingungkan ownership proses antar PPIC, Purchasing, QC, dan R&D.
+
+## Implikasi ke Rebuild
+- Dalam sistem baru, perlu dipisahkan dengan jelas:
+  - **material planning** (PPIC)
+  - **supplier/commercial sourcing** (Purchasing)
+  - **quality / test result** (QC)
+  - **technical/formulation suitability** (R&D bila relevan)
+- PPIC tetap perlu visibilitas, tetapi belum tentu menjadi owner input untuk seluruh aktivitas analisa material.
