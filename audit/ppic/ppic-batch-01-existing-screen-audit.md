@@ -771,3 +771,225 @@ Mitigasi:
   - PPIC processing status
   - qty produksi / hasil produksi
 - Ini penting supaya sistem baru tidak hanya meniru tampilan list, tetapi benar-benar menangkap business state yang bergerak di balik order.
+
+
+---
+
+# 15. Screen Audit - Sample / Data Sample
+
+## Identitas Screen
+- Nama screen: Data Sample
+- Module / area: Sample
+- Role pengguna: PPIC / PIC
+- Tipe screen: reference / monitoring list
+- Tujuan screen: melihat daftar sample yang sudah terdaftar dan keterkaitannya dengan produk
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tabel data sample
+- Kolom terlihat: nomor, nama produk, kode sample, total cost per sachet (Rp), total cost per kg (Rp), tipe sample, dibuat tanggal, aksi
+- Tombol aksi `Detail`
+- Badge tipe sample, terlihat label seperti `Draft Sample`
+
+## Observasi Objektif
+- PPIC punya visibilitas langsung ke modul sample.
+- Sample ditautkan ke nama produk dan kode sample secara eksplisit.
+- Ada informasi costing sample (`cost per sachet` dan `cost per kg`), sehingga modul sample existing juga memuat informasi cost reference.
+- Badge `Draft Sample` menunjukkan sample memiliki lifecycle status sendiri.
+- Kode sample tampak sangat konsisten digunakan di banyak layar lain (sales order, product, monitoring), menandakan sample code adalah entity penting di existing system.
+
+## Dugaan Logic Bisnis
+- Sample kemungkinan menjadi titik referensi utama sebelum produk masuk ke sales order dan planning.
+- PPIC mungkin menggunakan sample screen untuk memastikan referensi sample yang dipakai order sudah sesuai dan terdaftar.
+
+## Pertanyaan Terbuka
+- Apakah PPIC hanya bisa view sample atau juga memicu penggunaan sample untuk order tertentu?
+- Apakah sample cost dipakai untuk planning/costing atau sekadar referensi komersial?
+- Apa perbedaan lifecycle antara Draft Sample dan sample approved/final?
+
+## Kandidat Requirement Rebuild
+- Sistem baru perlu menjaga relasi sample -> product -> sales order secara eksplisit.
+- Status sample harus jelas: draft, under review, approved, locked, obsolete.
+- Jika PPIC memang perlu visibilitas, cukup tampilkan field yang relevan untuk planning dan readiness, bukan seluruh costing kalau tidak dibutuhkan.
+
+---
+
+# 16. Screen Audit - Production Schedule / Jadwal Timbang & Mixing
+
+## Identitas Screen
+- Nama screen: Jadwal Timbang & Mixing
+- Module / area: Production Schedule
+- Role pengguna: PPIC / PIC
+- Tipe screen: scheduling dashboard / calendar view
+- Tujuan screen: mengatur dan memantau jadwal timbang, mixing, dan produksi mingguan
+
+## Komponen Layar
+- Kalender mini bulanan di panel kiri
+- Event list: `Jadwal Timbang`, `Jadwal Mixing`, `Jadwal Produksi Mingguan`
+- Kalender besar di panel kanan
+- Toggle tampilan: Month / Week / Day / List
+- Tombol navigasi kalender
+
+## Observasi Objektif
+- Ini adalah screen schedule inti yang paling dekat dengan fungsi planning PPIC.
+- Existing system memisahkan event schedule ke minimal tiga jenis: timbang, mixing, dan produksi mingguan.
+- Tersedia beberapa mode tampilan kalender, artinya schedule bukan sekadar list sederhana tetapi sudah dipetakan secara waktu.
+- Dari screenshot belum terlihat detail event card atau form create/edit schedule.
+
+## Dugaan Logic Bisnis
+- PPIC existing kemungkinan menyusun schedule berbasis aktivitas proses, bukan hanya manufacturing order global.
+- Pemisahan timbang dan mixing menunjukkan tahap proses produksi dianggap penting sebagai unit penjadwalan tersendiri.
+
+## Pertanyaan Terbuka
+- Apakah schedule dibuat manual drag-drop atau dari form terstruktur?
+- Apakah jadwal produksi mingguan diturunkan dari sales order, PR material, atau keputusan manual PIC?
+- Bagaimana relasi schedule dengan kapasitas line, manpower, dan material readiness?
+
+## Kandidat Requirement Rebuild
+- Di sistem baru, production scheduling perlu menghubungkan order demand, readiness material, kapasitas line, dan aktivitas proses kunci.
+- Jika timbang dan mixing memang perlu dijadwalkan terpisah, sistem baru harus mendukung operation-level scheduling, bukan hanya MO header.
+
+---
+
+# 17. Screen Audit - Report / Laporan Sales Order (SO)
+
+## Identitas Screen
+- Nama screen: Laporan Sales Order (SO)
+- Module / area: Report
+- Role pengguna: PPIC / PIC
+- Tipe screen: report list / export-oriented report
+- Tujuan screen: menyediakan laporan sales order yang lebih lengkap untuk monitoring dan export
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tombol `Export to Excel`
+- Tabel laporan sales order
+- Kolom terlihat: no PO, no SO, customer, produk, kode sample, no PPIC, no PR, tanggal PO, due date PO, tanggal pembuatan, tanggal persetujuan marketing, dibuat oleh, gramasi, qty, isi box, box, roll, botol, karton, total batch, total kirim, dan kolom lain yang terpotong
+- Badge di kolom packaging seperti `Custom`
+- Badge lain seperti `Cari Printing`
+
+## Observasi Objektif
+- Laporan sales order di report module jauh lebih detail dibanding monitoring list biasa.
+- Ada field `no PPIC` dan `no PR`, sehingga laporan ini sudah menghubungkan order ke proses internal PPIC dan request pengadaan / proses terkait.
+- Ada field packaging detail (`box`, `roll`, `botol`, `karton`) yang menunjukkan order report juga dipakai untuk memantau kebutuhan atau realisasi packaging.
+- Badge `Custom` dan `Cari Printing` menunjukkan adanya kebutuhan packaging/printing spesifik pada order tertentu.
+
+## Dugaan Logic Bisnis
+- Report ini kemungkinan dipakai sebagai alat monitoring lintas fungsi, bukan hanya laporan pasif.
+- Sales order report existing tampak menjadi salah satu sumber untuk melihat dampak order terhadap packaging, PPIC process, dan pengiriman.
+
+## Pertanyaan Terbuka
+- Apa arti `no PPIC` dan bagaimana nomor itu dihasilkan?
+- Apakah `no PR` mengacu ke purchase request material/packaging yang terkait order?
+- Badge `Cari Printing` mengindikasikan status apa: perlu desain, perlu vendor printing, atau material belum siap?
+
+## Kandidat Requirement Rebuild
+- Report order di sistem baru sebaiknya tidak menjadi satu layar superpadat; lebih baik dibagi antara operational dashboard dan detailed export report.
+- Namun, linkage order -> PPIC -> PR -> packaging requirement harus tetap dipertahankan.
+
+---
+
+# 18. Screen Audit - Packaging / Purchase Request Packaging
+
+## Identitas Screen
+- Nama screen: Purchase Request Packaging
+- Module / area: Packaging
+- Role pengguna: PPIC / PIC
+- Tipe screen: transaction list / request monitoring
+- Tujuan screen: mencatat dan memantau purchase request packaging
+
+## Komponen Layar
+- Search field
+- Filter tanggal awal dan tanggal akhir
+- Tombol `Find`
+- Tombol `+ Tambah Purchase Request Packaging`
+- Tombol `Export to Excel`
+- Dropdown filter status
+- Tabel PR packaging
+- Kolom terlihat: aksi, no sales order, no PO, tanggal PO, nama, tanggal permintaan, tanggal approve, keterangan, supplier/printing, quantity (piece/roll), harga satuan, total harga, status PO, tanggal kirim, jumlah kirim (piece/roll)
+- Tombol aksi yang terlihat: `Edit`, `Cancel`, `Approve`, `Set Detail`
+- Badge status PO terlihat seperti `Close`, `Draft`, `Pending`
+- Ada baris total / kekurangan pengiriman
+
+## Observasi Objektif
+- Existing system memisahkan PR packaging dari PR raw material.
+- PPIC atau PIC tampak bisa create dan set detail PR packaging langsung dari layar ini.
+- Aksi `Approve` muncul di layar list, berarti approval bisa terjadi langsung di daftar transaksi.
+- Aksi `Set Detail` menunjukkan PR packaging punya detail lanjutan yang belum terlihat di batch ini.
+- `Supplier/Printing` berada di level penting, menandakan packaging procurement sangat terkait dengan vendor printing.
+- Ada penghitungan `kekurangan pengiriman`, menunjukkan screen ini juga dipakai memonitor fulfillment / shortage dari sisi supply packaging.
+
+## Dugaan Logic Bisnis
+- PR packaging existing adalah gabungan antara request, approval, supplier/printing assignment, dan shipment tracking.
+- Packaging procurement kemungkinan lebih kompleks daripada raw material karena terkait printing/vendor spesifik.
+
+## Pertanyaan Terbuka
+- Apakah `Approve` di list screen dilakukan PPIC sendiri atau role lain yang kebetulan terlihat karena login superadmin?
+- Apa fungsi detail dari `Set Detail`?
+- Status `Close`, `Draft`, dan `Pending` mengacu ke PR atau PO actual?
+- Apakah packaging PR dipicu dari sales order directly atau dari readiness check terpisah?
+
+## Kandidat Requirement Rebuild
+- Sistem baru perlu memisahkan PR packaging, approval, vendor assignment, artwork/printing readiness, dan receiving/fulfillment tracking dengan lebih jelas.
+- Namun, satu summary view tetap dibutuhkan karena existing user tampak sangat bergantung pada monitoring dari satu layar.
+
+---
+
+# 19. Screen Audit - Packaging / Pembatalan Permintaan Packaging
+
+## Identitas Screen
+- Nama screen: Pembatalan Permintaan Packaging
+- Module / area: Packaging
+- Role pengguna: PPIC / PIC
+- Tipe screen: exception / cancellation monitoring
+- Tujuan screen: memantau dan mencatat pembatalan purchase request packaging
+
+## Komponen Layar
+- Search field
+- Tombol `Find`
+- Tabel pembatalan permintaan packaging
+- Kolom terlihat: no sales order, no PO, nama, tanggal permintaan, keterangan, alasan pembatalan, supplier/printing, quantity (piece/roll), harga satuan, total harga, status PO, tanggal kirim, jumlah kirim (piece/roll), keterangan
+- Ada summary `Total kekurangan pengiriman`
+- Badge status `Close`
+
+## Observasi Objektif
+- Existing system memberi layar khusus untuk pembatalan PR packaging, bukan hanya status di layar utama.
+- Ada kolom `alasan pembatalan`, artinya cancellation reason menjadi data yang dicatat.
+- Shipment shortfall/kekurangan kirim tetap ditampilkan, sehingga pembatalan tetap dikaitkan dengan fulfillment reality.
+- Status PO masih ditampilkan walaupun permintaan dibatalkan, menandakan relasi antara PR/PO/cancellation tetap dipertahankan.
+
+## Dugaan Logic Bisnis
+- Pembatalan packaging request tampaknya merupakan exception yang cukup sering atau cukup penting sampai diberi layar khusus.
+- Existing process mungkin rawan perubahan order, perubahan desain, atau perubahan kebutuhan packaging sehingga cancellation perlu dimonitor tersendiri.
+
+## Pertanyaan Terbuka
+- Siapa yang berwenang membatalkan PR packaging?
+- Apakah cancellation ini membatalkan PR, membatalkan PO, atau hanya membatalkan sebagian kebutuhan?
+- Apakah alasan pembatalan distandardkan atau hanya free text?
+
+## Kandidat Requirement Rebuild
+- Sistem baru perlu cancellation workflow yang jelas untuk packaging karena dampaknya bisa ke vendor, cost, timeline, dan stock.
+- Cancellation reason perlu dikategorikan: perubahan order, desain belum approve, supplier issue, over-request, atau perubahan planning.
+
+---
+
+# Pembaruan Kesimpulan PPIC Setelah Batch Ini
+
+## Observasi Global Tambahan
+- Role PPIC existing terlihat sangat kuat pada area koordinasi order-to-planning, bukan hanya material monitoring.
+- Sample, production schedule, sales order report, packaging PR, dan cancellation menunjukkan PPIC menjadi titik kontrol operasional lintas domain.
+- Existing system cenderung memusatkan banyak keputusan dan monitoring dalam role ini, meskipun ownership riil masih perlu divalidasi.
+
+## Implikasi Rebuild Tambahan
+- Rebuild ERP baru kemungkinan perlu mempertahankan **visibility breadth** untuk PPIC, tetapi membatasi **edit/approve ownership** secara lebih disiplin.
+- Modul schedule, sample linkage, packaging request, dan sales order operational report harus dianggap sebagai komponen inti desain PPIC, bukan tambahan kecil.
+
+## Arah Audit Selanjutnya yang Direkomendasikan
+1. Detail / form create Purchase Request Packaging
+2. Detail / form create Purchase Request Raw Material
+3. Detail Sales Order
+4. Detail event di Production Schedule
+5. Report lain di module report (raw material, packaging, shipment)
+6. Jika ada, approval-specific screen untuk PPIC workflow
